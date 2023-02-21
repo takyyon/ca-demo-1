@@ -67,8 +67,8 @@ module api './core/host/container-app.bicep' = {
     targetPort: 80
     allowedOrigins: [ '${webServiceName}.${acaEnvironment.outputs.defaultDomain}' ]
     serviceBinds: enableSpringboard ? [
-      redis.outputs.id
-      postgreSql.outputs.id
+      redis.outputs.serviceId
+      postgreSql.outputs.serviceId
     ] : [ ]
   }
 }
