@@ -2,7 +2,7 @@ param name string
 param location string = resourceGroup().location
 param tags object = {}
 
-param containerAppsEnvironmentName string = ''
+param managedEnvironmentId string
 param containerName string = 'main'
 param env array = []
 param external bool = true
@@ -12,17 +12,17 @@ param allowedOrigins array = []
 param serviceBinds array = []
 
 @description('CPU cores allocated to a single container instance, e.g. 0.5')
-param containerCpuCoreCount string = '0.5'
+param containerCpuCoreCount string = '1.0'
 
 @description('Memory allocated to a single container instance, e.g. 1Gi')
-param containerMemory string = '1.0Gi'
+param containerMemory string = '2.0Gi'
 
 resource app 'Microsoft.App/containerApps@2022-10-01' = {
   name: name
   location: location
   tags: tags
   properties: {
-    managedEnvironmentId: containerAppsEnvironment.id
+    managedEnvironmentId: managedEnvironmentId
     configuration: {
       activeRevisionsMode: 'single'
       ingress: {
@@ -49,10 +49,6 @@ resource app 'Microsoft.App/containerApps@2022-10-01' = {
       ]
     }
   }
-}
-
-resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
-  name: containerAppsEnvironmentName
 }
 
 output uri string = 'https://${app.properties.configuration.ingress.fqdn}'

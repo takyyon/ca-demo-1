@@ -1,23 +1,20 @@
 targetScope = 'subscription'
-param resourcesSuffix string = '7'
 param environmentName string
-
-param resourceGroupName string = 'springboard-${resourcesSuffix}'
 param location string
-param acaLocation string = 'northcentralusstage' // use North Central US (Stage) for ACA resources
+param resourceGroupName string = ''
 
-param acaEnvironmentName string = 'aca-${resourcesSuffix}'
-param postgreSqlName string = 'postgres-${resourcesSuffix}'
-param redisCacheName string = 'redis-${resourcesSuffix}'
-param webServiceName string = 'web-service-${resourcesSuffix}'
-param apiServiceName string = 'api-service-${resourcesSuffix}'
+param acaLocation string = 'northcentralusstage' // use North Central US (Stage) for ACA resources
+param acaEnvironmentName string = 'aca-env'
+param postgreSqlName string = 'postgres'
+param redisCacheName string = 'redis'
+param webServiceName string = 'web-service'
+param apiServiceName string = 'api-service'
 param webImageName string = 'docker.io/ahmelsayed/springboard-web:latest'
 param apiImageName string = 'docker.io/ahmelsayed/springboard-api:latest'
-
 var tags = { 'azd-env-name': environmentName }
 
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: resourceGroupName
+  name: !empty(resourceGroupName) ? resourceGroupName : '${environmentName}-rg'
   location: location
   tags: tags
 }
@@ -32,62 +29,70 @@ module acaEnvironment './core/host/container-apps-environment.bicep' = {
   }
 }
 
-// The application database
-module postgreSql './app/db.bicep' = {
-  name: 'sql'
+module postgreSql './core/host/springboard-container-app.bicep' = {
+  name: 'postgres'
   scope: rg
   params: {
     name: postgreSqlName
     location: acaLocation
     tags: tags
-    environmentName: acaEnvironment.outputs.name
+    managedEnvironmentId: acaEnvironment.outputs.id
+    serviceType: 'postgres'
   }
 }
 
-module cache './app/cache.bicep' = {
-  name: 'cache'
+module redisCache './core/host/springboard-container-app.bicep' = {
+  name: 'redis'
   scope: rg
   params: {
     name: redisCacheName
-    location:acaLocation
-    tags: tags
-    environmentName: acaEnvironment.outputs.name
-  }
-}
-
-// The application frontend
-module web './app/web.bicep' = {
-  name: 'web'
-  scope: rg
-  params: {
-    name: webServiceName
     location: acaLocation
     tags: tags
-    environmentName: acaEnvironment.outputs.name
-    imageName: webImageName
-    apiBaseUri: 'https://${apiServiceName}.${acaEnvironment.outputs.defaultDomain}' //api.outputs.SERVICE_API_URI
+    managedEnvironmentId: acaEnvironment.outputs.id
+    serviceType: 'redis'
   }
 }
 
 // The application backend
-module api './app/api.bicep' = {
+module api './core/host/container-app.bicep' = {
   name: 'api'
   scope: rg
   params: {
     name: apiServiceName
     location: acaLocation
     tags: tags
-    environmentName: acaEnvironment.outputs.name
+    managedEnvironmentId: acaEnvironment.outputs.id
     imageName: apiImageName
+    targetPort: 80
     allowedOrigins: [ '${webServiceName}.${acaEnvironment.outputs.defaultDomain}' ]
     // serviceBinds: [
-      // cache.outputs.redisServiceId
-      // postgreSql.outputs.postgresServiceId
+    //   cache.outputs.id
+    //   postgreSql.outputs.id
     // ]
+  }
+}
+
+// the application frontend
+module web './core/host/container-app.bicep' = {
+  name: 'web'
+  scope: rg
+  params: {
+    name: webServiceName
+    location: acaLocation
+    tags: tags
+    managedEnvironmentId: acaEnvironment.outputs.id
+    imageName: webImageName
+    targetPort: 80
+    env: [
+      {
+        name: 'REACT_APP_API_BASE_URL'
+        value: 'https://${apiServiceName}.${acaEnvironment.outputs.defaultDomain}'
+      }
+    ]
   }
 }
 
 
 // App outputs
-output REACT_APP_API_BASE_URL string = api.outputs.SERVICE_API_URI
-output REACT_APP_WEB_BASE_URL string = web.outputs.SERVICE_WEB_URI
+output REACT_APP_API_BASE_URL string = api.outputs.uri
+output REACT_APP_WEB_BASE_URL string = web.outputs.uri
