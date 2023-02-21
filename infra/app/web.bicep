@@ -6,7 +6,7 @@ param environmentName string
 param imageName string
 param apiBaseUri string
 
-module web '../core/host/container-app.bicep' = {
+module app '../core/host/container-app.bicep' = {
   name: '${name}-deployment'
   params: {
     name: name
@@ -26,4 +26,4 @@ module web '../core/host/container-app.bicep' = {
   }
 }
 
-output SERVICE_WEB_URI string = web.outputs.uri
+output SERVICE_WEB_URI string = app.outputs.uri

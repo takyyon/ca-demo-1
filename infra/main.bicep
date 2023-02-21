@@ -1,17 +1,18 @@
 targetScope = 'subscription'
-param resourcesSuffix string = '3'
+param resourcesSuffix string = '7'
 param environmentName string
 
 param resourceGroupName string = 'springboard-${resourcesSuffix}'
-param location string = 'eastus2'
+param location string
+param acaLocation string = 'northcentralusstage' // use North Central US (Stage) for ACA resources
 
 param acaEnvironmentName string = 'aca-${resourcesSuffix}'
-param postgreSqlName string = 'postgre-${resourcesSuffix}'
+param postgreSqlName string = 'postgres-${resourcesSuffix}'
 param redisCacheName string = 'redis-${resourcesSuffix}'
 param webServiceName string = 'web-service-${resourcesSuffix}'
 param apiServiceName string = 'api-service-${resourcesSuffix}'
-param webServiceImage string = 'docker.io/ahmelsayed/springboard-web:latest'
-param apiServiceImage string = 'docker.io/ahmelsayed/springboard-api:latest'
+param webImageName string = 'docker.io/ahmelsayed/springboard-web:latest'
+param apiImageName string = 'docker.io/ahmelsayed/springboard-api:latest'
 
 var tags = { 'azd-env-name': environmentName }
 
@@ -21,12 +22,12 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-module acaenvironment './core/host/container-apps-environment.bicep' = {
+module acaEnvironment './core/host/container-apps-environment.bicep' = {
   name: 'container-apps-environment'
   scope: rg
   params: {
     name: acaEnvironmentName
-    location: location
+    location: acaLocation
     tags: tags
   }
 }
@@ -37,9 +38,9 @@ module postgreSql './app/db.bicep' = {
   scope: rg
   params: {
     name: postgreSqlName
-    location: location
+    location: acaLocation
     tags: tags
-    environmentName: acaenvironment.outputs.name
+    environmentName: acaEnvironment.outputs.name
   }
 }
 
@@ -48,9 +49,9 @@ module cache './app/cache.bicep' = {
   scope: rg
   params: {
     name: redisCacheName
-    location:location
+    location:acaLocation
     tags: tags
-    environmentName: acaenvironment.outputs.name
+    environmentName: acaEnvironment.outputs.name
   }
 }
 
@@ -60,11 +61,11 @@ module web './app/web.bicep' = {
   scope: rg
   params: {
     name: webServiceName
-    location: location
+    location: acaLocation
     tags: tags
-    environmentName: acaenvironment.outputs.name
-    imageName: webServiceImage
-    apiBaseUri: api.outputs.SERVICE_API_URI
+    environmentName: acaEnvironment.outputs.name
+    imageName: webImageName
+    apiBaseUri: 'https://${apiServiceName}.${acaEnvironment.outputs.defaultDomain}' //api.outputs.SERVICE_API_URI
   }
 }
 
@@ -74,11 +75,11 @@ module api './app/api.bicep' = {
   scope: rg
   params: {
     name: apiServiceName
-    location: location
+    location: acaLocation
     tags: tags
-    environmentName: acaenvironment.outputs.name
-    imageName: apiServiceImage
-    allowedOrigins: [ '*' ]
+    environmentName: acaEnvironment.outputs.name
+    imageName: apiImageName
+    allowedOrigins: [ '${webServiceName}.${acaEnvironment.outputs.defaultDomain}' ]
     // serviceBinds: [
       // cache.outputs.redisServiceId
       // postgreSql.outputs.postgresServiceId

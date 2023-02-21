@@ -7,7 +7,7 @@ param imageName string
 param allowedOrigins array
 param serviceBinds array = []
 
-module api '../core/host/container-app.bicep' = {
+module app '../core/host/container-app.bicep' = {
   name: '${name}-app-module'
   params: {
     name: name
@@ -23,4 +23,4 @@ module api '../core/host/container-app.bicep' = {
   }
 }
 
-output SERVICE_API_URI string = api.outputs.uri
+output SERVICE_API_URI string = app.outputs.uri
