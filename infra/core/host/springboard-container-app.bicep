@@ -27,7 +27,7 @@ resource app 'Microsoft.App/containerApps@2022-10-01' = {
   }
 }
 
-output serviceId object = {
+output id object = {
   serviceId: app.id
   name: name
 }
