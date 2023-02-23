@@ -12,7 +12,6 @@ param apiServiceName string = 'api-service'
 param webImageName string = 'docker.io/ahmelsayed/springboard-web:latest'
 param apiImageName string = 'docker.io/ahmelsayed/springboard-api:latest'
 var tags = { 'azd-env-name': environmentName }
-var enableSpringboard = true
 
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: !empty(resourceGroupName) ? resourceGroupName : '${environmentName}-rg'
@@ -38,7 +37,7 @@ module postgreSql './core/host/springboard-container-app.bicep' = {
     location: acaLocation
     tags: tags
     managedEnvironmentId: acaEnvironment.outputs.id
-    serviceType: enableSpringboard ? 'postgres' : ''
+    serviceType: 'postgres'
   }
 }
 
@@ -50,7 +49,7 @@ module redis './core/host/springboard-container-app.bicep' = {
     location: acaLocation
     tags: tags
     managedEnvironmentId: acaEnvironment.outputs.id
-    serviceType: enableSpringboard ? 'redis' : ''
+    serviceType: 'redis'
   }
 }
 
@@ -66,10 +65,10 @@ module api './core/host/container-app.bicep' = {
     imageName: apiImageName
     targetPort: 80
     allowedOrigins: [ '${webServiceName}.${acaEnvironment.outputs.defaultDomain}' ]
-    serviceBinds: enableSpringboard ? [
+    serviceBinds: [
       redis.outputs.serviceBind
       postgreSql.outputs.serviceBind
-    ] : [ ]
+    ] 
   }
 }
 

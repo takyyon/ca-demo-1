@@ -10,7 +10,7 @@ builder.Services.AddDbContext<TodoDb>(options =>
     var pgPassword = builder.Configuration["POSTGRES_PASSWORD"];
     var pgUser = builder.Configuration["POSTGRES_USERNAME"];
     var pgDatabase = builder.Configuration["POSTGRES_DATABASE"];
-    var pgConnection = $"Host={pgHost};Database={pgDatabase};Username={pgUser};Password={pgPassword}";
+    var pgConnection = $"Host={pgHost};Database={pgDatabase};Username={pgUser};Password={pgPassword};Timeout=300";
     options.UseNpgsql(pgConnection, sqlOptions => sqlOptions.EnableRetryOnFailure());
 });
 
