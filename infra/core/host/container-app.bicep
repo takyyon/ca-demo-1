@@ -12,12 +12,12 @@ param allowedOrigins array = []
 param serviceBinds array = []
 
 @description('CPU cores allocated to a single container instance, e.g. 0.5')
-param containerCpuCoreCount string = '1.0'
+param containerCpuCoreCount string = '0.5'
 
 @description('Memory allocated to a single container instance, e.g. 1Gi')
-param containerMemory string = '2.0Gi'
+param containerMemory string = '1.0Gi'
 
-resource app 'Microsoft.App/containerApps@2022-10-01' = {
+resource app 'Microsoft.App/containerApps@2022-11-01-preview' = {
   name: name
   location: location
   tags: tags
