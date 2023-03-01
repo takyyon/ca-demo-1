@@ -138,6 +138,53 @@ module redisStat './core/host/container-app.bicep' = {
   }
 }
 
+// module kafka './core/host/springboard-container-app.bicep' = {
+//   name: 'kafka'
+//   scope: rg
+//   params: {
+//     name: 'kafka-1'
+//     location: acaLocation
+//     managedEnvironmentId: acaEnvironment.outputs.id
+//     serviceType: 'kafka'
+//   }
+// }
+
+// module kafkaApp1 './core/host/container-app.bicep' = {
+//   name: 'kafka-ui'
+//   scope: rg
+//   params: {
+//     name: 'kafka-ui-1'
+//     location: acaLocation
+//     managedEnvironmentId: acaEnvironment.outputs.id
+//     imageName: ''
+//     targetPort: 8080
+//     serviceBinds: [
+//       kafka.outputs.serviceBind
+//     ]
+//     command: [
+//       '/bin/sh'
+//     ]
+//     args: [
+//       '-c'
+//       '''
+//       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS="$KAFKA_BOOTSTRAP_SERVERS" \
+//       KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG="$KAFKA_PROPERTIES_SASL_JAAS_CONFIG" \
+//       KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM="$KAFKA_SASL_MECHANISM" \
+//       KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL="$KAFKA_SECURITY_PROTOCOL" \
+//       java $JAVA_OPTS -jar kafka-ui-api.jar
+//       '''
+//     ]
+//     env: [
+//       {
+//         name: 'KAFKA_CLUSTERS_0_NAME'
+//         value: kafka.outputs.name
+//       }
+//     ]
+//     // cpu: '1.0'
+//     // memory: '1.0Gi'
+//   }
+// }
+
 // App outputs
 output REACT_APP_API_BASE_URL string = api.outputs.uri
 output REACT_APP_WEB_BASE_URL string = web.outputs.uri

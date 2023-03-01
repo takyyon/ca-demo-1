@@ -12,15 +12,15 @@ resource app 'Microsoft.App/containerApps@2022-11-01-preview' = {
   properties: {
     managedEnvironmentId: managedEnvironmentId
     configuration: {
-      service: !empty(serviceType) ? {
+      service: {
         type: serviceType
-      } : null
+      }
     }
     template: {
       containers: [
         {
           name: name
-          image: !empty(serviceType) ? serviceType : 'nginx:latest'
+          image: serviceType
         }
       ]
     }
@@ -31,3 +31,5 @@ output serviceBind object = {
   serviceId: app.id
   name: name
 }
+
+output name string = app.name
