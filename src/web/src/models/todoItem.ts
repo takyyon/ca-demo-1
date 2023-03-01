@@ -14,4 +14,5 @@ export interface TodoItem {
     completedDate?:Date
     createdDate?: Date
     updatedDate?: Date
+    fromCache?: string
 }

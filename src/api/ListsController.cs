@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
+using StackExchange.Redis;
 
 namespace SimpleTodo.Api;
 
@@ -7,6 +9,16 @@ namespace SimpleTodo.Api;
 public class ListsController : ControllerBase
 {
     private readonly ListsRepository _repository;
+    static readonly string RedisHost = Environment.GetEnvironmentVariable("REDIS_HOST") ?? "localhost";
+    static readonly string RedisPort = Environment.GetEnvironmentVariable("REDIS_PORT") ?? "6379";
+    static readonly string RedisPassword = Environment.GetEnvironmentVariable("REDIS_PASSWORD") ?? "";
+    static readonly ConnectionMultiplexer Redis = ConnectionMultiplexer.Connect(new ConfigurationOptions
+    {
+        AbortOnConnectFail = false,
+        EndPoints = {$"{RedisHost}:{RedisPort}"},
+        Password = RedisPassword,
+    });
+
 
     public ListsController(ListsRepository repository)
     {
@@ -74,6 +86,8 @@ public class ListsController : ControllerBase
         }
 
         await _repository.DeleteListAsync(list_id);
+        var db = Redis.GetDatabase();
+        await db.KeyDeleteAsync(list_id.ToString());
 
         return NoContent();
     }
@@ -83,11 +97,28 @@ public class ListsController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<ActionResult<IEnumerable<TodoItem>>> GetListItems(Guid list_id, [FromQuery] int? skip = null, [FromQuery] int? batchSize = null)
     {
+        var db = Redis.GetDatabase();
+        if (db.KeyExists(list_id.ToString()))
+        {
+            var value = await db.StringGetAsync(list_id.ToString());
+            if (!string.IsNullOrEmpty(value))
+            {
+                var parsed = JsonSerializer.Deserialize<IEnumerable<TodoItem>>(value);
+                return Ok(parsed.Select(i => {
+                    i.FromCache = "true";
+                    return i;
+                }));
+            }
+        }
+
         if (await _repository.GetListAsync(list_id) == null)
         {
             return NotFound();
         }
-        return Ok(await _repository.GetListItemsAsync(list_id, skip, batchSize));
+        var l = await _repository.GetListItemsAsync(list_id, null, null);
+        var str = JsonSerializer.Serialize(l);
+        await db.StringSetAsync(list_id.ToString(), str);
+        return Ok(l);
     }
 
     [HttpPost("{list_id}/items")]
@@ -109,6 +140,9 @@ public class ListsController : ControllerBase
         };
 
         await _repository.AddListItemAsync(newItem);
+        
+        var db = Redis.GetDatabase();
+        await db.KeyDeleteAsync(list_id.ToString());
 
         return CreatedAtAction(nameof(GetListItem), new { list_id = list_id, item_id = newItem.Id }, newItem);
     }
@@ -162,6 +196,8 @@ public class ListsController : ControllerBase
         }
 
         await _repository.DeleteListItemAsync(list_id, item_id);
+        var db = Redis.GetDatabase();
+        await db.KeyDeleteAsync(list_id.ToString());
 
         return NoContent();
     }

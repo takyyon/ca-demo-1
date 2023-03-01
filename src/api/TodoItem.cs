@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SimpleTodo.Api;
 
@@ -22,4 +23,7 @@ public class TodoItem
     public DateTimeOffset? CompletedDate { get; set; }
     public DateTimeOffset? CreatedDate { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedDate { get; set; }
+
+    [NotMapped]
+    public string FromCache {get; set;}
 }

@@ -26,6 +26,7 @@ interface TodoDisplayItem extends IObjectWithKey {
     data: TodoItem
     createdDate?: Date
     updatedDate?: Date
+    fromCache?: string
 }
 
 const addIconProps: IIconProps = {
@@ -42,7 +43,8 @@ const createListItems = (items: TodoItem[]): TodoDisplayItem[] => {
         key: item.id,
         dueDate: item.dueDate ? new Date(item.dueDate).toDateString() : 'None',
         completedDate: item.completedDate ? new Date(item.completedDate).toDateString() : 'N/A',
-        data: item
+        data: item,
+        fromCache: item.fromCache || 'false'
     }));
 };
 
@@ -155,6 +157,7 @@ const TodoItemListPane: FC<TodoItemListPaneProps> = (props: TodoItemListPaneProp
         { key: 'name', name: 'Name', fieldName: 'name', minWidth: 100 },
         { key: 'dueDate', name: 'Due', fieldName: 'dueDate', minWidth: 100 },
         { key: 'completedDate', name: 'Completed', fieldName: 'completedDate', minWidth: 100 },
+        { key: 'fromCache', name: 'Cached', fieldName: 'fromCache', minWidth: 100 },
     ];
 
     const groupRenderProps: IDetailsGroupRenderProps = {
