@@ -9,8 +9,8 @@ param postgreSqlName string = 'postgres'
 param redisCacheName string = 'redis'
 param webServiceName string = 'web-service'
 param apiServiceName string = 'api-service'
-param webImageName string = 'docker.io/ahmelsayed/springboard-web:r'
-param apiImageName string = 'docker.io/ahmelsayed/springboard-api:r4'
+param webImageName string = 'docker.io/ahmelsayed/springboard-web:latest'
+param apiImageName string = 'docker.io/ahmelsayed/springboard-api:latest'
 var tags = { 'azd-env-name': environmentName }
 
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
