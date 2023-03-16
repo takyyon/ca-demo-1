@@ -92,51 +92,51 @@ module web './core/host/container-app.bicep' = {
   }
 }
 
-module pgweb './core/host/container-app.bicep' = {
-  name: 'pgweb'
-  scope: rg
-  params: {
-    name: 'pgweb'
-    location: acaLocation
-    tags: tags
-    managedEnvironmentId: acaEnvironment.outputs.id
-    imageName: 'docker.io/sosedoff/pgweb:latest'
-    targetPort: 8081
-    command: [
-      '/bin/sh'
-    ]
-    args: [
-      '-c'
-      'PGWEB_DATABASE_URL=$POSTGRES_URL /usr/bin/pgweb --bind=0.0.0.0 --listen=8081'
-    ]
-    serviceBinds: [
-      postgreSql.outputs.serviceBind
-    ] 
-  }
-}
+// module pgweb './core/host/container-app.bicep' = {
+//   name: 'pgweb'
+//   scope: rg
+//   params: {
+//     name: 'pgweb'
+//     location: acaLocation
+//     tags: tags
+//     managedEnvironmentId: acaEnvironment.outputs.id
+//     imageName: 'docker.io/sosedoff/pgweb:latest'
+//     targetPort: 8081
+//     command: [
+//       '/bin/sh'
+//     ]
+//     args: [
+//       '-c'
+//       'PGWEB_DATABASE_URL=$POSTGRES_URL /usr/bin/pgweb --bind=0.0.0.0 --listen=8081'
+//     ]
+//     serviceBinds: [
+//       postgreSql.outputs.serviceBind
+//     ] 
+//   }
+// }
 
-module redisStat './core/host/container-app.bicep' = {
-  name: 'redis-stat'
-  scope: rg
-  params: {
-    name: 'redis-stat'
-    location: acaLocation
-    tags: tags
-    managedEnvironmentId: acaEnvironment.outputs.id
-    imageName: 'docker.io/insready/redis-stat:latest'
-    targetPort: 3000
-    command: [
-      '/bin/sh'
-    ]
-    args: [
-      '-c'
-      'redis-stat $REDIS_HOST:$REDIS_PORT --auth=$REDIS_PASSWORD --server=0.0.0.0'
-    ]
-    serviceBinds: [
-      redis.outputs.serviceBind
-    ] 
-  }
-}
+// module redisStat './core/host/container-app.bicep' = {
+//   name: 'redis-stat'
+//   scope: rg
+//   params: {
+//     name: 'redis-stat'
+//     location: acaLocation
+//     tags: tags
+//     managedEnvironmentId: acaEnvironment.outputs.id
+//     imageName: 'docker.io/insready/redis-stat:latest'
+//     targetPort: 3000
+//     command: [
+//       '/bin/sh'
+//     ]
+//     args: [
+//       '-c'
+//       'redis-stat $REDIS_HOST:$REDIS_PORT --auth=$REDIS_PASSWORD --server=0.0.0.0'
+//     ]
+//     serviceBinds: [
+//       redis.outputs.serviceBind
+//     ] 
+//   }
+// }
 
 // module kafka './core/host/springboard-container-app.bicep' = {
 //   name: 'kafka'
