@@ -2,6 +2,7 @@ targetScope = 'subscription'
 param environmentName string
 param location string
 param resourceGroupName string = ''
+param azureTags string = ''
 
 param acaLocation string = 'northcentralusstage' // use North Central US (Stage) for ACA resources
 param acaEnvironmentName string = 'aca-env'
@@ -11,7 +12,8 @@ param webServiceName string = 'web-service'
 param apiServiceName string = 'api-service'
 param webImageName string = 'docker.io/ahmelsayed/springboard-web:latest'
 param apiImageName string = 'docker.io/ahmelsayed/springboard-api:latest'
-var tags = { 'azd-env-name': environmentName }
+var azdTag = { 'azd-env-name': environmentName }
+var tags = union(empty(azureTags) ? {} : base64ToJson(azureTags), azdTag)
 
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: !empty(resourceGroupName) ? resourceGroupName : '${environmentName}-rg'
