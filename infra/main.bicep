@@ -4,7 +4,6 @@ param location string
 param resourceGroupName string = ''
 param azureTags string = ''
 
-param acaLocation string = 'northcentralusstage' // use North Central US (Stage) for ACA resources
 param acaEnvironmentName string = 'aca-env'
 param postgreSqlName string = 'postgres'
 param redisCacheName string = 'redis'
