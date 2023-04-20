@@ -4,7 +4,6 @@ param location string
 param resourceGroupName string = ''
 param azureTags string = ''
 
-param location string = ''
 param acaEnvironmentName string = 'aca-env'
 param postgreSqlName string = 'postgres'
 param redisCacheName string = 'redis'
