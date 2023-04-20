@@ -5,7 +5,7 @@ param tags object = {}
 param managedEnvironmentId string
 param serviceType string = ''
 
-resource app 'Microsoft.App/containerApps@2023-02-01' = {
+resource app 'Microsoft.App/containerApps@2022-11-01-preview' = {
   name: name
   location: location
   tags: tags
